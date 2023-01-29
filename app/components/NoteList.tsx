@@ -1,7 +1,10 @@
-import type { Note } from '~/data/notes';
+import { useLoaderData } from '@remix-run/react';
+import type { loader } from '~/routes/notes';
 import styles from './NoteList.css';
 
-function NoteList({ notes }: { notes: Note[] }) {
+function NoteList() {
+  const notes = useLoaderData<typeof loader>();
+
   return (
     <ul id="note-list">
       {notes.map((note, index) => (
