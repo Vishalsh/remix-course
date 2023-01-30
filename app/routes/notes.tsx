@@ -1,5 +1,6 @@
 import type { ActionArgs, LinksFunction } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
+import { Link, useCatch } from "@remix-run/react";
 import invariant from "tiny-invariant";
 
 import NewNote, { links as newNoteLinks } from "~/components/NewNote";
@@ -17,6 +18,12 @@ export default function NotesPage() {
 export async function loader() {
   const notes = await getStoredNotes();
 
+  if (notes.length === 0) {
+    throw json({ message: 'could not find any notes' }, {
+      status: 404,
+      statusText: 'Not Found',
+    })
+  }
   return json(notes);
 }
 
@@ -48,4 +55,27 @@ export async function action({ request }: ActionArgs) {
 
 export const links: LinksFunction = () => {
   return [...newNoteLinks(), ...noteListLinks()];
+}
+
+export function ErrorBoundary({ error }: { error: Error }) {
+  return (
+    <main className="error">
+      <h1>An Error Occured to ur notes</h1>
+      <p>{error.message}</p>
+      <p>Back to <Link to="/">Safety</Link>!</p>
+    </main>
+  )
+}
+
+export function CatchBoundary() {
+  const caughtResponse = useCatch();
+
+  const message = caughtResponse.data?.message || 'Data not found';
+
+  return (
+    <main>
+      <NewNote />
+      <p className="info-message">{message}</p>
+    </main>
+  )
 }
